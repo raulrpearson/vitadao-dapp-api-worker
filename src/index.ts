@@ -39,6 +39,8 @@ export default {
       method: "POST",
       body: JSON.stringify({ sql: query }),
     });
+    const res = response.clone();
+    console.log({ status: res.status });
 
     console.log("mutate response");
     // Browser cache 5 minutes. Clone response to mutate.
