@@ -1,26 +1,9 @@
-/**
- * Welcome to Cloudflare Workers! This is your first worker.
- *
- * - Run `wrangler dev src/index.ts` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your worker in action
- * - Run `wrangler publish src/index.ts --name my-worker` to publish your worker
- *
- * Learn more at https://developers.cloudflare.com/workers/
- */
+import * as queries from "./queries";
 
 export interface Env {
-  // Example binding to KV. Learn more at https://developers.cloudflare.com/workers/runtime-apis/kv/
-  // MY_KV_NAMESPACE: KVNamespace;
-  //
-  // Example binding to Durable Object. Learn more at https://developers.cloudflare.com/workers/runtime-apis/durable-objects/
-  // MY_DURABLE_OBJECT: DurableObjectNamespace;
-  //
-  // Example binding to R2. Learn more at https://developers.cloudflare.com/workers/runtime-apis/r2/
-  // MY_BUCKET: R2Bucket;
-  VARIABLE: string;
+  TRANSPOSE_URL: string;
+  TRANSPOSE_KEY: string;
 }
-
-const baseUrl = "https://random-data-api.com/api/v2";
 
 export default {
   async fetch(
@@ -28,13 +11,31 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
-    const { pathname } = new URL(request.url);
-    let response = await fetch(baseUrl + pathname, {
+    let query;
+    switch (new URL(request.url).pathname.slice(1)) {
+      case "history":
+        query = queries.history;
+        break;
+      case "stats":
+        query = queries.stats;
+        break;
+      case "tokens":
+        query = queries.tokens;
+        break;
+    }
+
+    let response = await fetch(env.TRANSPOSE_URL, {
+      headers: {
+        "X-API-KEY": env.TRANSPOSE_KEY,
+        "Content-Type": "application/json",
+      },
       cf: {
         // Cloudflare cache 5 minutes
         cacheTtl: 300,
         cacheEverything: true,
       },
+      method: "POST",
+      body: JSON.stringify({ sql: query }),
     });
 
     // Browser cache 5 minutes. Clone response to mutate.

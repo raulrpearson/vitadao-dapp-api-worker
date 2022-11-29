@@ -1,3 +1,10 @@
 name = "vitadao-dapp-api-worker"
 main = "src/index.ts"
 compatibility_date = "2022-11-16"
+
+[vars]
+TRANSPOSE_URL = "https://sql.transpose.io"
+
+# The necessary secrets are:
+# - TRANSPOSE_KEY
+# Run `echo <VALUE> | wrangler secret put <NAME>` for each of these
