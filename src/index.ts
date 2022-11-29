@@ -11,6 +11,7 @@ export default {
     env: Env,
     ctx: ExecutionContext
   ): Promise<Response> {
+    console.log("parse query");
     let query;
     switch (new URL(request.url).pathname.slice(1)) {
       case "history":
@@ -24,6 +25,7 @@ export default {
         break;
     }
 
+    console.log("fetch");
     let response = await fetch(env.TRANSPOSE_URL, {
       headers: {
         "X-API-KEY": env.TRANSPOSE_KEY,
@@ -38,9 +40,12 @@ export default {
       body: JSON.stringify({ sql: query }),
     });
 
+    console.log("mutate response");
     // Browser cache 5 minutes. Clone response to mutate.
     response = new Response(response.body, response);
     response.headers.set("Cache-Control", "max-age=300");
+
+    console.log("return");
     return response;
   },
 };
