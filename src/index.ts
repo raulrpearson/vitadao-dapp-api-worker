@@ -72,7 +72,6 @@ export default {
             cacheEverything: true,
           },
         });
-      // Add endpoint that POSTs somewhere else
       case "/post":
         return fetch("https://jsonplaceholder.typicode.com/posts", {
           method: "POST",
@@ -94,36 +93,16 @@ export default {
     }
 
     console.log("fetch");
-    console.log({
-      env: JSON.stringify(env),
-      url: env.TRANSPOSE_URL,
-      key: env.TRANSPOSE_KEY,
-    });
     let response = await fetch("https://sql.transpose.io", {
+      method: "POST",
+      body: JSON.stringify({ sql: query }),
       headers: {
         "X-API-KEY": env.TRANSPOSE_KEY,
         "Content-Type": "application/json",
       },
-      cf: {
-        // Match TTL to the one used for random-data-api.com
-        cacheTtl: 60,
-        cacheEverything: true,
-      },
-      method: "POST",
-      body: JSON.stringify({ sql: query }),
-    });
-    const res = response.clone();
-    // Extend logging
-    console.log({
-      status: res.status,
-      statusText: res.statusText,
-      stringified: JSON.stringify(res),
     });
 
-    // console.log("mutate response");
-    // Browser cache 5 minutes. Clone response to mutate.
-    // response = new Response(response.body, response);
-    // response.headers.set("Cache-Control", "max-age=300");
+    console.log({ ...response.clone() });
 
     console.log("return");
     return response;
