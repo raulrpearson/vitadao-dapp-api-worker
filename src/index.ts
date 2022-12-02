@@ -93,16 +93,33 @@ export default {
     }
 
     console.log("fetch");
-    let response = await fetch("https://sql.transpose.io", {
+    let response = fetch("https://sql.transpose.io", {
       method: "POST",
       body: JSON.stringify({ sql: query }),
       headers: {
         "X-API-KEY": env.TRANSPOSE_KEY,
         "Content-Type": "application/json",
       },
-    });
+    })
+      .then(
+        (value) => value,
+        (reason) => reason
+      )
+      .catch((e) => {
+        console.log("catched and error mofo!");
+        console.log(e.message);
+        console.log(e);
+      });
 
-    console.log({ ...response.clone() });
+    // const res = response.clone();
+    // console.log({
+    //   status: res.status,
+    //   statusText: res.statusText,
+    //   headers: res.headers,
+    //   ok: res.ok,
+    //   redirected: res.redirected,
+    //   url: res.url,
+    // });
 
     console.log("return");
     return response;
