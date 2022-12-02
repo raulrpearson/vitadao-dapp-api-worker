@@ -36,6 +36,13 @@ const index = `<!DOCTYPE html>
         purpose of this endpoint is to test that the caching works (which it
         does, across Cloudflare datacenters).
       </li>
+      <li>
+        <a href="/post">post</a>: triggers a post to
+        jsonplaceholder.typicode.com, simulating the creation of a resource.
+        This was added to troubleshoot the 502 returned from a POST to
+        Transpose. We wanted to test whether Cloudflare is being more
+        restrictive with POST requests than GET requests.
+      </li>
     </ul>
   </body>
 </html>`;
@@ -58,14 +65,26 @@ export default {
       case "/tokens":
         query = queries.tokens;
         break;
-      case "/random": {
+      case "/random":
         return fetch("https://random-data-api.com/api/v2/beers", {
           cf: {
             cacheTtl: 60,
             cacheEverything: true,
           },
         });
-      }
+      // Add endpoint that POSTs somewhere else
+      case "/post":
+        return fetch("https://jsonplaceholder.typicode.com/posts", {
+          method: "POST",
+          body: JSON.stringify({
+            title: "foo",
+            body: "bar",
+            userId: 1,
+          }),
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+          },
+        });
       default:
         return new Response(index, {
           headers: {
@@ -75,26 +94,36 @@ export default {
     }
 
     console.log("fetch");
-    let response = await fetch(env.TRANSPOSE_URL, {
+    console.log({
+      env: JSON.stringify(env),
+      url: env.TRANSPOSE_URL,
+      key: env.TRANSPOSE_KEY,
+    });
+    let response = await fetch("https://sql.transpose.io", {
       headers: {
         "X-API-KEY": env.TRANSPOSE_KEY,
         "Content-Type": "application/json",
       },
       cf: {
-        // Cloudflare cache 5 minutes
-        cacheTtl: 300,
+        // Match TTL to the one used for random-data-api.com
+        cacheTtl: 60,
         cacheEverything: true,
       },
       method: "POST",
       body: JSON.stringify({ sql: query }),
     });
     const res = response.clone();
-    console.log({ status: res.status, statusText: res.statusText });
+    // Extend logging
+    console.log({
+      status: res.status,
+      statusText: res.statusText,
+      stringified: JSON.stringify(res),
+    });
 
-    console.log("mutate response");
+    // console.log("mutate response");
     // Browser cache 5 minutes. Clone response to mutate.
-    response = new Response(response.body, response);
-    response.headers.set("Cache-Control", "max-age=300");
+    // response = new Response(response.body, response);
+    // response.headers.set("Cache-Control", "max-age=300");
 
     console.log("return");
     return response;
