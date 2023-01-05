@@ -15,7 +15,7 @@ const index = `<!DOCTYPE html>
   </head>
   <body style="max-width: 600px">
     <h1>VitaDAO workers API</h1>
-    <p>Choose and endpoint</p>
+    <p>Direct fetching from Transpose fails with 502:</p>
     <ul>
       <li>
         <a href="/history">history</a>: a timeseries of the total USD balance of
@@ -29,6 +29,24 @@ const index = `<!DOCTYPE html>
         <a href="/tokens">tokens</a>: list of tokens currently in vitadao.eth
         and some data about each token.
       </li>
+    </ul>
+    <p>Fetching through a proxy on Deno works:</p>
+    <ul>
+      <li>
+        <a href="/proxy-history">proxy-history</a>: a timeseries of the total USD balance of
+        vitadao.eth's multisig. One data point per day.
+      </li>
+      <li>
+        <a href="/proxy-stats">proxy-stats</a>: circulating supply (currently total supply)
+        of VITA and its market cap.
+      </li>
+      <li>
+        <a href="/proxy-tokens">proxy-tokens</a>: list of tokens currently in vitadao.eth
+        and some data about each token.
+      </li>
+    </ul>
+    <p>Other tests:</p>
+    <ul>
       <li>
         <a href="/random">random</a>: a random beer fetched from
         random-data-api.com, cached for 60 seconds on Cloudflare. I.e. you
@@ -51,20 +69,38 @@ export default {
   async fetch(
     request: Request,
     env: Env,
-    ctx: ExecutionContext
+    _ctx: ExecutionContext
   ): Promise<Response> {
-    console.log("parse query");
-    let query;
+    const post = (url: string, body: Record<"sql", string>) => {
+      return fetch(url, {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers: {
+          "X-API-KEY": env.TRANSPOSE_KEY,
+          "Content-Type": "application/json",
+        },
+      });
+    };
+
     switch (new URL(request.url).pathname) {
       case "/history":
-        query = queries.history;
-        break;
+        return post("https://sql.transpose.io", { sql: queries.history });
       case "/stats":
-        query = queries.stats;
-        break;
+        return post("https://sql.transpose.io", { sql: queries.stats });
       case "/tokens":
-        query = queries.tokens;
-        break;
+        return post("https://sql.transpose.io", { sql: queries.tokens });
+      case "/proxy-history":
+        return post("https://cloudflare-transpose-proxy.deno.dev/", {
+          sql: queries.history,
+        });
+      case "/proxy-stats":
+        return post("https://cloudflare-transpose-proxy.deno.dev/", {
+          sql: queries.stats,
+        });
+      case "/proxy-tokens":
+        return post("https://cloudflare-transpose-proxy.deno.dev/", {
+          sql: queries.tokens,
+        });
       case "/random":
         return fetch("https://random-data-api.com/api/v2/beers", {
           cf: {
@@ -91,37 +127,5 @@ export default {
           },
         });
     }
-
-    console.log("fetch");
-    let response = fetch("https://sql.transpose.io", {
-      method: "POST",
-      body: JSON.stringify({ sql: query }),
-      headers: {
-        "X-API-KEY": env.TRANSPOSE_KEY,
-        "Content-Type": "application/json",
-      },
-    })
-      .then(
-        (value) => value,
-        (reason) => reason
-      )
-      .catch((e) => {
-        console.log("catched and error mofo!");
-        console.log(e.message);
-        console.log(e);
-      });
-
-    // const res = response.clone();
-    // console.log({
-    //   status: res.status,
-    //   statusText: res.statusText,
-    //   headers: res.headers,
-    //   ok: res.ok,
-    //   redirected: res.redirected,
-    //   url: res.url,
-    // });
-
-    console.log("return");
-    return response;
   },
 };
