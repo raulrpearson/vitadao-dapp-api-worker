@@ -88,7 +88,7 @@ router
     })
   )
   .get("/count/post", () =>
-    fetch("https://post-receiver.raulrpearson.workers.dev/", {
+    fetch("https://cloudflare-transpose-proxy.deno.dev/post-receiver", {
       method: "POST",
       cf: {
         cacheTtl: 60,
@@ -97,7 +97,7 @@ router
     })
   )
   .get("/count/get", () =>
-    fetch("https://post-receiver.raulrpearson.workers.dev/")
+    fetch("https://cloudflare-transpose-proxy.deno.dev/post-receiver")
   );
 
 // Root and 404
