@@ -2,6 +2,10 @@ name = "vitadao-dapp-api-worker"
 main = "src/index.ts"
 compatibility_date = "2022-11-16"
 
+kv_namespaces = [
+  { binding = "cache", id = "836f5b792c1340ffb29389e998640877" }
+]
+
 [vars]
 
 # The necessary secrets are:

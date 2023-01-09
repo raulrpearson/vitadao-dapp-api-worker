@@ -1,13 +1,14 @@
-import { missing, ThrowableRouter } from "itty-router-extras";
+import { json, missing, ThrowableRouter } from "itty-router-extras";
 
 import * as constants from "./constants";
 
 export interface Env {
   TRANSPOSE_KEY: string;
+  cache: KVNamespace;
 }
 
 const TRANSPOSE_URL = "https://sql.transpose.io";
-const PROXY_URL = "https://cloudflare-transpose-proxy.deno.dev/";
+const PROXY_URL = "https://cloudflare-transpose-proxy.deno.dev";
 
 const router = ThrowableRouter();
 
@@ -87,18 +88,37 @@ router
       },
     })
   )
-  .get("/count/post", () =>
-    fetch("https://cloudflare-transpose-proxy.deno.dev/post-receiver", {
-      method: "POST",
-      cf: {
-        cacheTtl: 60,
-        cacheEverything: true,
-      },
-    })
-  )
-  .get("/count/get", () =>
-    fetch("https://cloudflare-transpose-proxy.deno.dev/post-receiver")
-  );
+  .get("/count/post", async (_req, env) => {
+    // TODO improve typing of env
+    const count = env.cache.get("count") as {
+      timestamp: string;
+      value: Record<string, unknown>;
+    } | null;
+
+    if (count && Date.now() - Number(count.timestamp) <= 30_000) {
+      // Fresh cache value
+      return json(count.value);
+    } else if (count) {
+      // Stale while revalidate
+      fetch(PROXY_URL + "/post-receiver", { method: "POST" })
+        .then((res) => res.json())
+        .then((value) =>
+          env.cache.put("count", { timestamp: Date.now(), value })
+        );
+      return json(count.value);
+    } else {
+      // Cache miss
+      return fetch(PROXY_URL + "/post-receiver", { method: "POST" })
+        .then((res) => res.json())
+        .then((value) => {
+          env.cache.put("count", { timestamp: Date.now(), value });
+          // TODO shouldn't json be able to take any type?
+          // @ts-expect-error
+          return json(value);
+        });
+    }
+  })
+  .get("/count/get", () => fetch(PROXY_URL + "/post-receiver"));
 
 // Root and 404
 router
