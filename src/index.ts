@@ -87,18 +87,17 @@ router
       },
     })
   )
-  .get("/post", () =>
-    fetch("https://jsonplaceholder.typicode.com/posts", {
+  .get("/count/post", () =>
+    fetch("https://post-receiver.raulrpearson.workers.dev/", {
       method: "POST",
-      body: JSON.stringify({
-        title: "foo",
-        body: "bar",
-        userId: 1,
-      }),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
+      cf: {
+        cacheTtl: 60,
+        cacheEverything: true,
       },
     })
+  )
+  .get("/count/get", () =>
+    fetch("https://post-receiver.raulrpearson.workers.dev/")
   );
 
 // Root and 404

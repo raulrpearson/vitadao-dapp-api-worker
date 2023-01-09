@@ -26,19 +26,19 @@ export const index = `<!DOCTYPE html>
     <p>Fetching through a proxy on Deno works:</p>
     <ul>
       <li>
-        <a href="/proxy-history">proxy-history</a>: a timeseries of the total USD balance of
-        vitadao.eth's multisig. One data point per day.
+        <a href="/proxy-history">proxy-history</a>: a timeseries of the total
+        USD balance of vitadao.eth's multisig. One data point per day.
       </li>
       <li>
-        <a href="/proxy-stats">proxy-stats</a>: circulating supply (currently total supply)
-        of VITA and its market cap.
+        <a href="/proxy-stats">proxy-stats</a>: circulating supply (currently
+        total supply) of VITA and its market cap.
       </li>
       <li>
-        <a href="/proxy-tokens">proxy-tokens</a>: list of tokens currently in vitadao.eth
-        and some data about each token.
+        <a href="/proxy-tokens">proxy-tokens</a>: list of tokens currently in
+        vitadao.eth and some data about each token.
       </li>
     </ul>
-    <p>Other tests:</p>
+    <p>Caching tests:</p>
     <ul>
       <li>
         <a href="/random">random</a>: a random beer fetched from
@@ -48,11 +48,17 @@ export const index = `<!DOCTYPE html>
         does, across Cloudflare datacenters).
       </li>
       <li>
-        <a href="/post">post</a>: triggers a post to
-        jsonplaceholder.typicode.com, simulating the creation of a resource.
-        This was added to troubleshoot the 502 returned from a POST to
-        Transpose. We wanted to test whether Cloudflare is being more
-        restrictive with POST requests than GET requests.
+        <a href="/count/post">/count/post</a>: POSTs to
+        post-receiver.raulrpearson.workers.dev and returns the response. That
+        service will increment count on POST and just return the unincremented
+        count on GET. This endpoint will serve to validate a caching strategy
+        for POST requests.
+      </li>
+      <li>
+        <a href="/count/get">/count/get</a>: GETs
+        post-receiver.raulrpearson.workers.dev and returns the response. That
+        service will increment count on POST and just return the unincremented
+        count on GET.
       </li>
     </ul>
   </body>
