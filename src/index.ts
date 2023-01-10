@@ -17,7 +17,7 @@ const router = ThrowableRouter();
 
 // Direct Transpose fetches
 router
-  .get("/history", (_req, env) =>
+  .get("/502/history", (_req, env) =>
     fetch(TRANSPOSE_URL, {
       method: "POST",
       body: JSON.stringify({ sql: historyQuery }),
@@ -27,7 +27,7 @@ router
       },
     })
   )
-  .get("/stats", (_req, env) =>
+  .get("/502/stats", (_req, env) =>
     fetch(TRANSPOSE_URL, {
       method: "POST",
       body: JSON.stringify({ sql: statsQuery }),
@@ -37,7 +37,7 @@ router
       },
     })
   )
-  .get("/tokens", (_req, env) =>
+  .get("/502/tokens", (_req, env) =>
     fetch(TRANSPOSE_URL, {
       method: "POST",
       body: JSON.stringify({ sql: tokensQuery }),
@@ -50,7 +50,7 @@ router
 
 // Proxied Transpose fetches
 router
-  .get("/proxy-history", (_req, env) =>
+  .get("/history", (_req, env) =>
     fetch(PROXY_URL, {
       method: "POST",
       body: JSON.stringify({ sql: historyQuery }),
@@ -60,7 +60,7 @@ router
       },
     })
   )
-  .get("/proxy-stats", (_req, env) =>
+  .get("/stats", (_req, env) =>
     fetch(PROXY_URL, {
       method: "POST",
       body: JSON.stringify({ sql: statsQuery }),
@@ -70,7 +70,7 @@ router
       },
     })
   )
-  .get("/proxy-tokens", (_req, env) =>
+  .get("/tokens", (_req, env) =>
     fetch(PROXY_URL, {
       method: "POST",
       body: JSON.stringify({ sql: tokensQuery }),
