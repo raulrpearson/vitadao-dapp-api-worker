@@ -1,6 +1,9 @@
 import { json, missing, ThrowableRouter } from "itty-router-extras";
 
-import * as constants from "./constants";
+import index from "./index.html";
+import historyQuery from "./queries/history.sql";
+import statsQuery from "./queries/stats.sql";
+import tokensQuery from "./queries/tokens.sql";
 
 export interface Env {
   TRANSPOSE_KEY: string;
@@ -17,7 +20,7 @@ router
   .get("/history", (_req, env) =>
     fetch(TRANSPOSE_URL, {
       method: "POST",
-      body: JSON.stringify({ sql: constants.history }),
+      body: JSON.stringify({ sql: historyQuery }),
       headers: {
         "X-API-KEY": env.TRANSPOSE_KEY,
         "Content-Type": "application/json",
@@ -27,7 +30,7 @@ router
   .get("/stats", (_req, env) =>
     fetch(TRANSPOSE_URL, {
       method: "POST",
-      body: JSON.stringify({ sql: constants.stats }),
+      body: JSON.stringify({ sql: statsQuery }),
       headers: {
         "X-API-KEY": env.TRANSPOSE_KEY,
         "Content-Type": "application/json",
@@ -37,7 +40,7 @@ router
   .get("/tokens", (_req, env) =>
     fetch(TRANSPOSE_URL, {
       method: "POST",
-      body: JSON.stringify({ sql: constants.tokens }),
+      body: JSON.stringify({ sql: tokensQuery }),
       headers: {
         "X-API-KEY": env.TRANSPOSE_KEY,
         "Content-Type": "application/json",
@@ -50,7 +53,7 @@ router
   .get("/proxy-history", (_req, env) =>
     fetch(PROXY_URL, {
       method: "POST",
-      body: JSON.stringify({ sql: constants.history }),
+      body: JSON.stringify({ sql: historyQuery }),
       headers: {
         "X-API-KEY": env.TRANSPOSE_KEY,
         "Content-Type": "application/json",
@@ -60,7 +63,7 @@ router
   .get("/proxy-stats", (_req, env) =>
     fetch(PROXY_URL, {
       method: "POST",
-      body: JSON.stringify({ sql: constants.stats }),
+      body: JSON.stringify({ sql: statsQuery }),
       headers: {
         "X-API-KEY": env.TRANSPOSE_KEY,
         "Content-Type": "application/json",
@@ -70,7 +73,7 @@ router
   .get("/proxy-tokens", (_req, env) =>
     fetch(PROXY_URL, {
       method: "POST",
-      body: JSON.stringify({ sql: constants.tokens }),
+      body: JSON.stringify({ sql: tokensQuery }),
       headers: {
         "X-API-KEY": env.TRANSPOSE_KEY,
         "Content-Type": "application/json",
@@ -141,7 +144,7 @@ router
   .get(
     "/",
     () =>
-      new Response(constants.index, {
+      new Response(index, {
         headers: {
           "Content-Type": "text/html",
         },

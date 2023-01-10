@@ -6,6 +6,10 @@ kv_namespaces = [
   { binding = "cache", id = "836f5b792c1340ffb29389e998640877", preview_id = "8c401b30516a4560883ac7bb8d6809c9" }
 ]
 
+rules = [
+  { type = "Text", globs = ["**/*.sql"], fallthrough = true }
+]
+
 [vars]
 
 # The necessary secrets are:
