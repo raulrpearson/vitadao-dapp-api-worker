@@ -88,7 +88,7 @@ router
       },
     })
   )
-  .get("/count/post", async (_req, env) => {
+  .get("/count/post", async (_req, env, ctx) => {
     // TODO improve typing of env
     const count = JSON.parse(await env.cache.get("count")) as {
       timestamp: string;
@@ -101,18 +101,22 @@ router
       return json(count.value);
     } else if (count) {
       console.log("swr", count);
-      // Stale while revalidate
-      fetch(PROXY_URL + "/post-receiver", { method: "POST" })
-        .then((res) => res.json())
-        .then((value) =>
-          env.cache.put(
-            "count",
-            JSON.stringify({
-              timestamp: Date.now(),
-              value,
-            })
+      // Stale while revalidate. waitUntil doesn't block, just signals the CF
+      // Worker runtime to wait until this promise is settled before unwinding
+      // the V8 isolate, I guess.
+      ctx.waitUntil(
+        fetch(PROXY_URL + "/post-receiver", { method: "POST" })
+          .then((res) => res.json())
+          .then((value) =>
+            env.cache.put(
+              "count",
+              JSON.stringify({
+                timestamp: Date.now(),
+                value,
+              })
+            )
           )
-        );
+      );
       return json(count.value);
     } else {
       console.log("miss", count);
