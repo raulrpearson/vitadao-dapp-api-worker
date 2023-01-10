@@ -90,7 +90,7 @@ router
   )
   .get("/count/post", async (_req, env) => {
     // TODO improve typing of env
-    const count = env.cache.get("count") as {
+    const count = JSON.parse(await env.cache.get("count")) as {
       timestamp: string;
       value: Record<string, unknown>;
     } | null;
@@ -103,7 +103,13 @@ router
       fetch(PROXY_URL + "/post-receiver", { method: "POST" })
         .then((res) => res.json())
         .then((value) =>
-          env.cache.put("count", { timestamp: Date.now(), value })
+          env.cache.put(
+            "count",
+            JSON.stringify({
+              timestamp: Date.now(),
+              value,
+            })
+          )
         );
       return json(count.value);
     } else {
@@ -111,7 +117,13 @@ router
       return fetch(PROXY_URL + "/post-receiver", { method: "POST" })
         .then((res) => res.json())
         .then((value) => {
-          env.cache.put("count", { timestamp: Date.now(), value });
+          env.cache.put(
+            "count",
+            JSON.stringify({
+              timestamp: Date.now(),
+              value,
+            })
+          );
           // TODO shouldn't json be able to take any type?
           // @ts-expect-error
           return json(value);

@@ -3,7 +3,7 @@ main = "src/index.ts"
 compatibility_date = "2022-11-16"
 
 kv_namespaces = [
-  { binding = "cache", id = "836f5b792c1340ffb29389e998640877" }
+  { binding = "cache", id = "836f5b792c1340ffb29389e998640877", preview_id = "8c401b30516a4560883ac7bb8d6809c9" }
 ]
 
 [vars]
