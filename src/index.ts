@@ -96,11 +96,9 @@ router
     } | null;
 
     if (count && Date.now() - Number(count.timestamp) <= 30_000) {
-      console.log("fresh", count);
       // Fresh cache value
       return json(count.value);
     } else if (count) {
-      console.log("swr", count);
       // Stale while revalidate. waitUntil doesn't block, just signals the CF
       // Worker runtime to wait until this promise is settled before unwinding
       // the V8 isolate, I guess.
@@ -119,7 +117,6 @@ router
       );
       return json(count.value);
     } else {
-      console.log("miss", count);
       // Cache miss
       return fetch(PROXY_URL + "/post-receiver", { method: "POST" })
         .then((res) => res.json())
